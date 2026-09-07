@@ -68,6 +68,8 @@ export function imageUrl(source?: SanityImageObject | null, width = 1200): strin
   try {
     const url = builder
       .image(source as SanityImageSource)
+      // The global next/image loader overwrites `w` with the width the browser
+      // actually asked for, so this is only a ceiling for direct URL callers.
       .width(width)
       // `auto('format')` lets Sanity's CDN content-negotiate WebP/AVIF, which
       // matters because several source stills are multi-megabyte PNGs. Sanity's
