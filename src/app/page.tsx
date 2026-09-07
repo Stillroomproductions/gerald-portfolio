@@ -1,18 +1,14 @@
-import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { colors, typography } from "@/assets/util";
-// import { projects } from "@/assets/data";
+import { getAllProjects, getSiteSettings } from "@/lib/queries";
+import { SanityPicture } from "@/components/SanityPicture";
+import { hasImageAsset } from "@/lib/imageUrl";
 
-// ── Images ─────────────────────────────────────────────
-// Swap these with your final assets — paths/names are placeholders.
-import heroStill from "@/assets/images/background4.png";
-import headshot from "@/assets/images/headshot.jpg";
-import directingBTS from "@/assets/images/back3.jpeg";
-import atmosphericStop from "@/assets/images/back1.jpeg";
-import atmosphericIncidents from "@/assets/images/back2.jpeg";
-import { getAllProjects } from "@/lib/queries";
+// Every image on this page comes from Sanity. There are deliberately no
+// bundled fallback images: a slot with nothing uploaded renders nothing,
+// rather than showing a stock photo the client never chose.
 export const dynamic = 'force-dynamic'
 // ── Section divider ─────────────────────────────────────
 function Divider() {
@@ -41,42 +37,20 @@ function SectionLabel({ children, style }: { children: React.ReactNode; style?: 
   );
 }
 
-// ── Full-width atmospheric band ─────────────────────────
-function AtmosphericBand({
-  src,
-  alt,
-  caption,
-}: {
-  src: typeof atmosphericStop;
-  alt: string;
-  caption: string;
-}) {
-  return (
-    <section>
-      <div
-        className="relative w-full overflow-hidden"
-        style={{ aspectRatio: "21/9" }}
-      >
-        <Image src={src} alt={alt} fill className="object-cover" style={{ objectFit: "cover" }} />
-        <span
-          className="absolute bottom-4 left-6 text-[9px] uppercase"
-          style={{
-            color: "rgba(255,255,255,0.4)",
-            letterSpacing: typography.tracking.widest,
-          }}
-        >
-          {caption}
-        </span>
-      </div>
-    </section>
-  );
-}
-
 // ═══════════════════════════════════════════════════════
 // PAGE
 // ═══════════════════════════════════════════════════════
 export default async function Home() {
-  const projects = await getAllProjects();
+  const [projects, settings] = await Promise.all([
+    getAllProjects(),
+    getSiteSettings(),
+  ]);
+
+  // Each of these sections is dropped entirely when its image is missing, so
+  // an unconfigured slot never leaves a blank band on the page.
+  const showDirecting = hasImageAsset(settings?.directingImage);
+  const atmospheric = (settings?.atmosphericImages ?? []).filter(hasImageAsset);
+  const showAbout = hasImageAsset(settings?.portrait);
 
   return (
     <>
@@ -163,42 +137,26 @@ export default async function Home() {
                   backgroundColor: colors.background.main,
                 }}
               >
-                <div
-                  className="relative w-full overflow-hidden"
-                  style={{ aspectRatio: "16/9" }}
-                >
-                  {/* <Image
-            src={project.stills[0]}
-            alt={`${project.title} — film still`}
-            fill
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
-          /> */}
-
-                  {project.stills?.[0]?.url ? (
-                    <Image
-                      src={project.stills[0].url}
-                      alt={project.title}
-                      fill
-                      className="object-cover"
-                      style={{ objectFit: "cover" }}
-                    />
-                  ) : (
-                    <div style={{
-                      width: '100%',
-                      height: '100%',
-                      backgroundColor: '#1a1a1a',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#666',
-                      fontSize: '0.75rem',
-                      letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
-                    }}>
-                      No project image
-                    </div>
-                  )}
-                </div>
+                {/* The card is a hard 16:9 crop, so the hotspot set in the
+                    Studio decides what stays in frame. A film with no still
+                    falls back to an empty tinted slot that matches the page,
+                    rather than a dark "no image" block. */}
+                <SanityPicture
+                  source={project.stills?.[0]}
+                  aspectRatio="16/9"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  alt={`${project.title} — film still`}
+                />
+                {!hasImageAsset(project.stills?.[0]) ? (
+                  <div
+                    className="w-full"
+                    style={{
+                      aspectRatio: "16/9",
+                      backgroundColor: colors.background.alt,
+                    }}
+                    aria-hidden="true"
+                  />
+                ) : null}
 
                 <div
                   className="flex items-center justify-between px-4 py-3"
@@ -230,26 +188,26 @@ export default async function Home() {
           </div>
         </section>
 
-        <Divider />
-
         {/* ══ 4. DIRECTING ═════════════════════════════════════
-            Black-and-white BTS — director with crew around the monitor. */}
-        <section id="directing" className="px-0 md:px-12 py-14 md:py-20">
-          <SectionLabel style={{ paddingLeft: 12 }}>Directing</SectionLabel>
+            Black-and-white BTS — director with crew around the monitor.
+            Hidden entirely until an image is set in Site Settings. */}
+        {showDirecting ? (
+          <>
+            <Divider />
+            <section id="directing" className="px-0 md:px-12 py-14 md:py-20">
+              <SectionLabel style={{ paddingLeft: 12 }}>Directing</SectionLabel>
 
-          <div
-            className="relative w-full overflow-hidden mt-8"
-            style={{ aspectRatio: "16/9" }}
-          >
-            <Image
-              src={directingBTS}
-              alt="Gerald Gyimah on set with crew, reviewing the monitor"
-              fill
-              className="object-cover grayscale"
-              style={{ objectFit: "cover" }}
-            />
-          </div>
-        </section>
+              <SanityPicture
+                source={settings?.directingImage}
+                aspectRatio="16/9"
+                sizes="(max-width: 768px) 100vw, 90vw"
+                alt="Gerald Gyimah on set with crew, reviewing the monitor"
+                className="mt-8"
+                grayscale
+              />
+            </section>
+          </>
+        ) : null}
 
         <Divider />
 
@@ -308,34 +266,40 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="relative bg-gray-300" style={{ minHeight: "300px" }}>
-            <Image
-              src={headshot}
-              alt="Gerald Gyimah — headshot"
-              fill
-              className="object-cover object-top hidden"
-              style={{ objectFit: "cover" }}
+          {/* Portrait beside the bio. The image previously carried Tailwind's
+              `hidden`, so this container rendered as a bare grey block — one of
+              the gaps on the homepage. The slot is a tall column on desktop and
+              a 4:3 crop on mobile, which cuts a portrait photo hard, so the
+              framing comes from the hotspot set in the Studio. */}
+          {showAbout ? (
+            <SanityPicture
+              source={settings?.portrait}
+              sizes="(max-width: 768px) 100vw, 50vw"
+              alt="Gerald Gyimah"
+              className="aspect-[4/3] md:aspect-auto md:h-full"
             />
-          </div>
+          ) : null}
         </section>
 
-        <Divider />
-
-        {/* ══ 5. ATMOSPHERE — STOP ═════════════════════════════ */}
-        <AtmosphericBand
-          src={atmosphericIncidents}
-          alt="STOP door"
-          caption=""
-        />
-
-        <Divider />
-
-        {/* ══ 6. ATMOSPHERE — INCIDENTS MUST BE RECORDED ══════ */}
-        <AtmosphericBand
-          src={atmosphericStop}
-          alt="Incidents must be recorded sign"
-          caption=""
-        />
+        {/* ══ 5. ATMOSPHERIC BANDS ═════════════════════════════
+            Full-width 21:9 bands, added and reordered in Site Settings. This
+            is the hardest crop on the site, so each one is framed by its
+            hotspot. No images uploaded means no bands — and no empty space. */}
+        {atmospheric.map((image, i) => (
+          <div key={image._key ?? i}>
+            <Divider />
+            <section>
+              <SanityPicture
+                source={image}
+                aspectRatio="21/9"
+                sizes="100vw"
+                width={2400}
+                alt=""
+                caption={image.caption}
+              />
+            </section>
+          </div>
+        ))}
 
         <Divider />
 

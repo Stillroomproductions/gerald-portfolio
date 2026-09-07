@@ -19,14 +19,11 @@ async function getProjectSlugs(): Promise<SitemapProject[]> {
       { next: { revalidate: 3600 } }
     );
   } catch {
-    // If Sanity is unreachable at build/revalidation time, fall back to the
-    // known static slugs so the sitemap is never empty.
-    return [
-      { slug: "on-record" },
-      { slug: "protocol" },
-      { slug: "consultation" },
-      { slug: "assessment" },
-    ];
+    // If Sanity is unreachable at build/revalidation time, return no film
+    // routes rather than a hardcoded list. A stale list goes wrong in both
+    // directions — it drops new films and advertises removed ones as 404s —
+    // and the static routes below still keep the sitemap from being empty.
+    return [];
   }
 }
 

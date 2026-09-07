@@ -4,7 +4,7 @@ import { colors, typography } from "@/assets/util";
 export default function Footer() {
   return (
     <footer
-      className="flex items-center justify-between px-12 py-5 mt-6"
+      className="flex items-center justify-between px-6 md:px-12 py-5 mt-6"
       style={{
         borderTop: `1px solid ${colors.border}`,
         fontFamily: typography.fonts.primary,
