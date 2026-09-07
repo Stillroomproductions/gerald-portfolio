@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import Link from "next/link";
 import { colors, typography } from "@/assets/util";
 import { getAllProjects, getSiteSettings } from "@/lib/queries";
-import { SanityPicture } from "@/components/SanityPicture";
+import { SanityPicture, SanityImageWhole } from "@/components/SanityPicture";
 import { hasImageAsset } from "@/lib/imageUrl";
 
 const siteUrl =
@@ -205,10 +205,11 @@ export default async function AboutPage() {
                 <span className="text-[9px]">—</span>
               </div>
 
-              {/* Portrait */}
-              <SanityPicture
+              {/* Portrait — shown whole at the shape it was uploaded at, so
+                  the photographer's framing is preserved rather than being
+                  cropped into a fixed slot. */}
+              <SanityImageWhole
                 source={settings?.portrait}
-                aspectRatio="3/4"
                 sizes="(max-width: 768px) 100vw, 45vw"
                 alt="Gerald Gyimah — portrait"
                 className="mt-8 md:mt-10"

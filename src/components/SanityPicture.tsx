@@ -76,6 +76,59 @@ export function SanityPicture({
 }
 
 /**
+ * A Sanity image shown whole at its own aspect ratio — never cropped.
+ *
+ * Use this where the framing of the photograph itself matters and a fixed slot
+ * would cut into it. Because the intrinsic size comes from the asset reference,
+ * the browser reserves the right space and the image keeps exactly the shape it
+ * was uploaded at. The hotspot is irrelevant here: nothing is being cropped, so
+ * there is no focal point to preserve.
+ */
+export function SanityImageWhole({
+  source,
+  sizes,
+  alt = "",
+  className,
+  priority,
+  caption,
+}: {
+  source?: SanityImageObject | null;
+  sizes: string;
+  alt?: string;
+  className?: string;
+  priority?: boolean;
+  caption?: string;
+}) {
+  const image = sanityImage(source, 1600, alt);
+  const dimensions = imageDimensions(source);
+  if (!image) return null;
+
+  const { width, height } = dimensions ?? { width: 1600, height: 2000 };
+
+  return (
+    <div className={`relative w-full ${className ?? ""}`}>
+      <Image
+        src={image.src}
+        alt={image.alt}
+        width={width}
+        height={height}
+        sizes={sizes}
+        priority={priority}
+        className="h-auto w-full"
+      />
+      {caption ? (
+        <span
+          className="absolute bottom-4 left-6 text-[9px] uppercase"
+          style={{ color: "rgba(255,255,255,0.65)", letterSpacing: "0.14em" }}
+        >
+          {caption}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+/**
  * A poster shown whole at its natural shape.
  *
  * Deliberately not `fill`/`object-cover`: the brief is that a poster is never

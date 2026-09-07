@@ -3,7 +3,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { colors, typography } from "@/assets/util";
 import { getAllProjects, getSiteSettings } from "@/lib/queries";
-import { SanityPicture } from "@/components/SanityPicture";
+import { SanityPicture, SanityImageWhole } from "@/components/SanityPicture";
 import { hasImageAsset } from "@/lib/imageUrl";
 
 // Every image on this page comes from Sanity. There are deliberately no
@@ -268,15 +268,16 @@ export default async function Home() {
 
           {/* Portrait beside the bio. The image previously carried Tailwind's
               `hidden`, so this container rendered as a bare grey block — one of
-              the gaps on the homepage. The slot is a tall column on desktop and
-              a 4:3 crop on mobile, which cuts a portrait photo hard, so the
-              framing comes from the hotspot set in the Studio. */}
+              the gaps on the homepage. It is now shown whole at the shape it
+              was uploaded at: the photograph is not cropped to fit the column,
+              so the photographer's framing is kept intact. `self-start` stops
+              the grid stretching it to match the height of the bio column. */}
           {showAbout ? (
-            <SanityPicture
+            <SanityImageWhole
               source={settings?.portrait}
               sizes="(max-width: 768px) 100vw, 50vw"
               alt="Gerald Gyimah"
-              className="aspect-[4/3] md:aspect-auto md:h-full"
+              className="self-start"
             />
           ) : null}
         </section>
