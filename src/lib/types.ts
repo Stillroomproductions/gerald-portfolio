@@ -1,4 +1,6 @@
 import { colors } from "@/assets/util";
+import type { SanityImageObject } from "@/lib/imageUrl";
+
 export type ProjectStatus = "Complete" | "In Development" | "Post-Production";
 
 export interface Credit {
@@ -6,12 +8,20 @@ export interface Credit {
   name: string;
 }
 
-// Stills are now Sanity image references, not StaticImageData
-export interface SanityImageRef {
+// Stills are Sanity image objects, not StaticImageData. The full object is
+// carried through (asset/hotspot/crop) so `sanityImage()` can apply the crop
+// and focal point the editor set in the Studio.
+export interface SanityImageRef extends SanityImageObject {
   _key: string;
-  url: string;
-  alt?: string;
-  hotspot?: { x: number; y: number; height: number; width: number };
+}
+
+/** One festival / official selection row. Only `name` is required. */
+export interface FestivalSelection {
+  _key?: string;
+  name: string;
+  year?: string;
+  award?: string;
+  laurel?: SanityImageObject;
 }
 
 export interface Project {
@@ -29,6 +39,14 @@ export interface Project {
   synopsis?: string;
   releaseDate?: string;
   order?: number;
+  /** Optional Vimeo/YouTube link. No video section renders without it. */
+  trailerUrl?: string;
+  /** Heading shown above the video. Defaults to "Trailer". */
+  trailerLabel?: string;
+  /** Festival run. Section is hidden when empty. */
+  festivalSelections?: FestivalSelection[];
+  /** Portrait marketing poster, shown whole at its natural aspect ratio. */
+  poster?: SanityImageObject;
 }
 
 export const statusColor: Record<ProjectStatus, string> = {
@@ -36,3 +54,11 @@ export const statusColor: Record<ProjectStatus, string> = {
   "In Development": colors.text.tertiary,
   "Post-Production": colors.text.secondary,
 };
+
+/** Image slots managed from the Site Settings singleton in the Studio. */
+export interface SiteSettings {
+  portrait?: SanityImageObject;
+  onSetImage?: SanityImageObject & { caption?: string };
+  directingImage?: SanityImageObject;
+  atmosphericImages?: (SanityImageObject & { caption?: string })[];
+}
