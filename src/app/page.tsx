@@ -275,9 +275,9 @@ export default async function Home() {
           {showAbout ? (
             <SanityImageWhole
               source={settings?.portrait}
-              sizes="(max-width: 768px) 100vw, 50vw"
+              sizes="(max-width: 768px) 100vw, 420px"
               alt="Gerald Gyimah"
-              className="self-start"
+              className="self-start md:max-w-[420px] md:mx-auto md:px-6"
             />
           ) : null}
         </section>

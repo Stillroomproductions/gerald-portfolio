@@ -210,9 +210,9 @@ export default async function AboutPage() {
                   cropped into a fixed slot. */}
               <SanityImageWhole
                 source={settings?.portrait}
-                sizes="(max-width: 768px) 100vw, 45vw"
+                sizes="(max-width: 768px) 100vw, 420px"
                 alt="Gerald Gyimah — portrait"
-                className="mt-8 md:mt-10"
+                className="mt-8 md:mt-10 md:max-w-[420px]"
                 priority
               />
 
