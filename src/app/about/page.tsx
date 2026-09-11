@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Image from "next/image";
 import Link from "next/link";
 import { colors, typography } from "@/assets/util";
-import { getAllProjects, getSiteSettings } from "@/lib/queries";
-import { SanityPicture, SanityImageWhole } from "@/components/SanityPicture";
-import { hasImageAsset } from "@/lib/imageUrl";
+import { getAllProjects } from "@/lib/queries";
+// import person1 from "@/assets/images/person1.jpg";
+// import person2 from "@/assets/images/person2.jpg";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://geraldgyimah.com";
@@ -33,27 +34,13 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const [allProjects, settings] = await Promise.all([
-    getAllProjects(),
-    getSiteSettings(),
-  ]);
-
-  // Show top 3 projects as "Selected Work". `year` can be unset in Sanity, so
-  // the label is built from whatever is present rather than printing "null".
-  const selectedWork = allProjects.slice(0, 3).map((p) => {
-    const year = p.year ? String(p.year) : "";
-    const inDevelopment = p.status === "In Development";
-    return {
-      title: p.title,
-      year: inDevelopment ? [year, "In Development"].filter(Boolean).join(" — ") : year,
-      slug: p.slug,
-    };
-  });
-
-  // Drop the whole right-hand column when neither photo has been uploaded, so
-  // the page never shows the empty outlined boxes it used to.
-  const hasImages =
-    hasImageAsset(settings?.portrait) || hasImageAsset(settings?.onSetImage);
+  const allProjects = await getAllProjects();
+  // Show top 3 projects as "Selected Work"
+  const selectedWork = allProjects.slice(0, 3).map((p) => ({
+    title: p.title,
+    year: p.status === "In Development" ? `${p.year} — In Development` : String(p.year),
+    slug: p.slug,
+  }));
   return (
     <>
       <Navbar />
@@ -189,44 +176,70 @@ export default async function AboutPage() {
             </div>
           </div>
 
-          {/* ── Right ──
-              Both slots come from Site Settings in the Studio. An empty slot
-              renders nothing rather than an outlined placeholder box, and if
-              neither image is set the whole column is dropped so the grid does
-              not reserve half the page for empty space. */}
-          {hasImages ? (
-            <div className="flex flex-col px-6 md:px-12 pb-12 md:pb-20">
-              {/* Spacer to align with left section label — desktop only */}
-              <div
-                className="hidden md:block py-10"
-                style={{ borderBottom: `1px solid ${colors.border}`, opacity: 0 }}
-                aria-hidden="true"
-              >
-                <span className="text-[9px]">—</span>
-              </div>
-
-              {/* Portrait — shown whole at the shape it was uploaded at, so
-                  the photographer's framing is preserved rather than being
-                  cropped into a fixed slot. */}
-              <SanityImageWhole
-                source={settings?.portrait}
-                sizes="(max-width: 768px) 100vw, 45vw"
-                alt="Gerald Gyimah — portrait"
-                className="mt-8 md:mt-10"
-                priority
-              />
-
-              {/* Observational / on-set image */}
-              <SanityPicture
-                source={settings?.onSetImage}
-                aspectRatio="16/9"
-                sizes="(max-width: 768px) 100vw, 45vw"
-                alt="Gerald Gyimah on set"
-                className="mt-1"
-                caption={settings?.onSetImage?.caption}
-              />
+          {/* ── Right ── */}
+          <div className="flex flex-col px-6 md:px-12 pb-12 md:pb-20">
+            {/* Spacer to align with left section label — desktop only */}
+            <div
+              className="hidden md:block py-10"
+              style={{ borderBottom: `1px solid ${colors.border}`, opacity: 0 }}
+            >
+              <span className="text-[9px]">—</span>
             </div>
-          ) : null}
+
+            {/* Portrait */}
+            <div
+              className="relative w-full mt-8 md:mt-10 overflow-hidden flex items-end p-4"
+              style={{
+                aspectRatio: "3/4",
+                backgroundColor: colors.background.alt,
+                border: `1px solid ${colors.border}`,
+              }}
+            >
+              {/* <Image
+                src={person1}
+                alt="Gerald Gyimah — portrait"
+                fill
+                className="object-cover"
+                priority
+              /> */}
+              <span
+                className="relative z-10 text-[10px] uppercase"
+                style={{
+                  color: colors.text.tertiary,
+                  letterSpacing: typography.tracking.wide,
+                }}
+              >
+                Portrait
+              </span>
+            </div>
+
+            {/* Observational / directing image */}
+            <div
+              className="relative w-full mt-1 overflow-hidden flex items-end p-4"
+              style={{
+                aspectRatio: "16/9",
+                backgroundColor: colors.background.alt,
+                border: `1px solid ${colors.border}`,
+                borderTop: "none",
+              }}
+            >
+              {/* <Image
+                src={person2}
+                alt="Gerald Gyimah — on set"
+                fill
+                className="object-cover"
+              /> */}
+              <span
+                className="relative z-10 text-[10px] uppercase"
+                style={{
+                  color: colors.text.tertiary,
+                  letterSpacing: typography.tracking.wide,
+                }}
+              >
+                On set, undated
+              </span>
+            </div>
+          </div>
         </div>
       </main>
       <Footer />

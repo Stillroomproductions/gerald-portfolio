@@ -30,10 +30,6 @@ export const metadata: Metadata = {
 };
 
 
-// TODO (awaiting Gerald): confirm which of these mailboxes actually exist.
-// The site currently advertises three different addresses — hello@ and press@
-// here, gerald@ on the homepage. They are defined in one place so that once
-// confirmed, correcting them is a single edit. See CONTENT-GUIDE.md.
 const enquiries = [
   {
     label: "General",
@@ -52,19 +48,10 @@ const enquiries = [
   },
 ];
 
-// The Vimeo row was removed: it pointed at vimeo.com's homepage while
-// advertising a personal profile. Add it back with a real URL if one exists.
 const links = [
-  {
-    label: "IMDb",
-    href: "https://www.imdb.com/name/nm10308534/",
-    value: "Gerald Gyimah",
-  },
-  {
-    label: "Instagram",
-    href: "https://www.instagram.com/gerald.gyimah/",
-    value: "@gerald.gyimah",
-  },
+  { label: "IMDb", href: "https://pro.imdb.com/name/nm10308534/public/?ref_=ext_shr_wts", value: "/geraldgyimah" },
+  { label: "Vimeo", href: "https://vimeo.com", value: "/geraldgyimah" },
+  { label: "Instagram", href: "https://www.instagram.com/gerald.gyimah/", value: "@gerald.gyimah" },
 ];
 
 function ContactRow({
