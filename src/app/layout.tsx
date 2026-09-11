@@ -51,11 +51,9 @@ export const metadata: Metadata = {
     "Protocol short film 2026",
     "The Consultation short film",
     "Assessment short film director",
+    "Gerald Gyimah Breakable",
+    "Gerald Gyimah EastEnders director",
     "Gerald Gyimah London based filmmaker",
-    // Removed pending confirmation: "Gerald Gyimah EastEnders director" and
-    // "Gerald Gyimah Breakable" asserted credits that could not be verified.
-    // Claiming an unearned credit is a reputational risk, and `keywords` is
-    // ignored by Google anyway — so this carried risk with no upside.
   ],
 
   authors: [{ name: "Gerald Gyimah", url: siteUrl }],
