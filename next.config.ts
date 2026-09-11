@@ -9,13 +9,6 @@ const nextConfig: NextConfig = {
 
   // ── Images ────────────────────────────────────────────────────────────────
   images: {
-    // Resizing is delegated to Sanity's CDN, which has already optimised these
-    // files. Routing them through Next's optimizer as well encodes each image
-    // twice and times out on a cold cache, which left the wide homepage bands
-    // rendering as blank space. See src/lib/sanityImageLoader.ts.
-    loader: "custom",
-    loaderFile: "./src/lib/sanityImageLoader.ts",
-
     // cdn.sanity.io required for Sanity-hosted stills
     remotePatterns: [
       {

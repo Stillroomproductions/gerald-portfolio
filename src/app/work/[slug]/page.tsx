@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import Image from "next/image";
 import { colors, typography } from "@/assets/util";
+// import { projects, statusColor, Project } from "@/assets/data";
 import { getAllProjects, getProjectBySlug } from "@/lib/queries";
-import type { Credit } from "@/lib/types";
-import { SanityPicture, SanityPoster } from "@/components/SanityPicture";
-import { hasImageAsset, ogImageUrl, sanityImage } from "@/lib/imageUrl";
-import { videoEmbedUrl } from "@/lib/videoEmbed";
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -49,12 +45,12 @@ export async function generateMetadata({
     project.logline ||
     `${project.title} — a ${project.format?.toLowerCase() ?? "short film"} written and directed by Gerald Gyimah. Still Room Productions, London.`;
 
-  // OG image: the first Sanity still cropped to 1200×630, or the static
-  // site-level OG image as fallback. Built through the URL builder so the
-  // share card is framed by the hotspot rather than centre-cropped.
-  const ogStill = project.stills?.find(hasImageAsset);
+  // OG image: use the first Sanity still cropped to 1200×630, or the static
+  // site-level OG image as fallback.
   const ogImage =
-    (ogStill && ogImageUrl(ogStill)) || `${siteUrl}/opengraph-image`;
+    project.stills && project.stills.length > 0 && project.stills[0].url
+      ? `${project.stills[0].url}?w=1200&h=630&fit=crop&q=85`
+      : `${siteUrl}/opengraph-image`;
 
   const canonicalUrl = `${siteUrl}/work/${slug}`;
 
@@ -132,15 +128,13 @@ function buildFilmSchema(project: {
 
 // ---------- sub-components ----------
 
-/** One label/value row. Renders nothing when the field is unset in Sanity. */
 function MetaRow({
   label,
   value,
 }: {
   label: string;
-  value?: string;
+  value: string;
 }) {
-  if (!value) return null;
   return (
     <div
       className="flex items-baseline justify-between gap-4 py-3"
@@ -195,6 +189,29 @@ function CreditRow({ role, name }: { role: string; name: string }) {
   );
 }
 
+function StillPlaceholder({ index }: { index: number }) {
+  return (
+    <div
+      className="flex items-center justify-center"
+      style={{
+        aspectRatio: "16/10",
+        backgroundColor: colors.background.alt,
+        border: `1px solid ${colors.border}`,
+      }}
+    >
+      <span
+        className="text-[10px] uppercase"
+        style={{
+          color: colors.text.tertiary,
+          letterSpacing: typography.tracking.widest,
+        }}
+      >
+        Still {String(index).padStart(2, "0")}
+      </span>
+    </div>
+  );
+}
+
 // ---------- page ----------
 
 export default async function ProjectPage({
@@ -203,24 +220,51 @@ export default async function ProjectPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const project = await getProjectBySlug(slug);
+  const projects = await getAllProjects();
+  const project = projects.find((p) => p.slug === slug);
 
-  // notFound() sends a real HTTP 404. The page previously rendered its own
-  // "not found" message with a 200 status, which invites search engines to
-  // index every mistyped URL as a valid page.
   if (!project) {
-    notFound();
+    return (
+      <>
+        <Navbar />
+        <main
+          className="min-h-screen pt-[72px] flex items-center justify-center"
+          style={{
+            backgroundColor: colors.background.main,
+            fontFamily: typography.fonts.primary,
+          }}
+        >
+          <div className="text-center px-6">
+            <p
+              className="text-[10px] uppercase mb-4"
+              style={{
+                color: colors.text.tertiary,
+                letterSpacing: typography.tracking.widest,
+              }}
+            >
+              Project not found
+            </p>
+            <Link
+              href="/work"
+              className="text-[11px] uppercase underline underline-offset-4"
+              style={{
+                color: colors.text.secondary,
+                letterSpacing: typography.tracking.wider,
+              }}
+            >
+              ← Return to index
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
   }
 
-  const validStills = project.stills?.filter(hasImageAsset) ?? [];
-  const stills = validStills.length > 0 ? validStills : null;
+  const validStills = project.stills?.filter((s: any) => s.url) || null;
+  const stills = validStills && validStills.length > 0 ? validStills : null;
 
-  // Only a recognised Vimeo/YouTube link produces an embed; anything else
-  // renders no video section at all.
-  const trailer = videoEmbedUrl(project.trailerUrl);
-  const festivals = project.festivalSelections?.filter((f) => f?.name) ?? [];
-
-  const formatDuration = (d?: string) => {
+  const formatDuration = (d?: any) => {
     if (!d) return d;
     const str = String(d).trim();
     if (/^\d+$/.test(str)) return `${str} mins`;
@@ -228,26 +272,28 @@ export default async function ProjectPage({
     return str;
   };
 
-  const processCredits = (credits?: Credit[]) => {
+  const processCredits = (credits?: any[]) => {
     if (!credits) return [];
-    const directors = credits.filter((c) => c.role?.toLowerCase() === 'director');
-    const writers = credits.filter((c) => c.role?.toLowerCase() === 'writer');
+    const directors = credits.filter((c: any) => c.role?.toLowerCase() === 'director');
+    const writers = credits.filter((c: any) => c.role?.toLowerCase() === 'writer');
     const shouldCombine = directors.length === 1 && writers.length === 1 && directors[0].name === writers[0].name;
-    const processed: Credit[] = [];
-
+    const processed: { role: string; name: string }[] = [];
+    
     if (shouldCombine) {
       processed.push({ role: 'Written & Directed by', name: directors[0].name });
     }
-
-    credits.forEach((c) => {
+    
+    credits.forEach((c: any) => {
       if (!c.role) return;
       const roleLower = c.role.toLowerCase();
       if (shouldCombine && (roleLower === 'director' || roleLower === 'writer')) return;
-
-      const roleName = roleLower === 'cast' ? 'Starring' : c.role;
+      
+      let roleName = c.role;
+      if (roleLower === 'cast') roleName = 'Starring';
+      
       processed.push({ role: roleName, name: c.name });
     });
-
+    
     return processed;
   };
 
@@ -301,119 +347,61 @@ export default async function ProjectPage({
         <div className="flex flex-col md:flex-row">
           {/* ── Images (primary content, shown first) ── */}
           <div className="order-1 md:order-1 md:flex-1">
-            {/* Stills grid. Each slot is a fixed 16:10 crop, so the hotspot
-                set in the Studio decides what survives the crop. Nothing is
-                rendered at all when a film has no stills. */}
+            {/* Stills grid — same size images as before, just visible immediately */}
             {stills ? (
               <div
                 className="grid grid-cols-1 sm:grid-cols-2"
                 style={{ gap: "1px", backgroundColor: colors.border }}
               >
-                {stills.map((still, i) => (
-                  <SanityPicture
-                    key={still._key ?? i}
-                    source={still}
-                    aspectRatio="16/10"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    alt={`${project.title} — still ${i + 1}`}
-                    priority={i === 0}
-                  />
+                {stills.map((src: any, i: number) => {
+                  return (
+                    <div
+                      key={i}
+                      className="relative overflow-hidden"
+                      style={{
+                        aspectRatio: "16/10",
+                        backgroundColor: colors.background.alt,
+                      }}
+                    >
+                      <Image
+                        src={src.url}
+                        alt={`${project.title} — still ${i + 1}`}
+                        fill
+                        priority={i === 0}
+                        className="object-cover"
+                        style={{ objectFit: "cover" }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div
+                className="grid grid-cols-1 sm:grid-cols-2"
+                style={{ gap: "1px", backgroundColor: colors.border }}
+              >
+                {[1, 2].map((n) => (
+                  <StillPlaceholder key={n} index={n} />
                 ))}
               </div>
-            ) : null}
+            )}
 
-            {/* ── Trailer / teaser ──
-                Only rendered when the editor has added a recognised Vimeo or
-                YouTube link. No autoplay — the visitor presses play. */}
-            {trailer ? (
-              <section className="px-6 md:px-8 py-10">
-                <SidebarLabel>{project.trailerLabel || "Trailer"}</SidebarLabel>
-                <div
-                  className="relative w-full mt-6"
-                  style={{ aspectRatio: "16/9", backgroundColor: colors.background.alt }}
-                >
-                  <iframe
-                    src={trailer}
-                    title={`${project.title} — ${(project.trailerLabel || "trailer").toLowerCase()}`}
-                    className="absolute top-0 left-0 w-full h-full border-0"
-                    allow="fullscreen; picture-in-picture"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    loading="lazy"
-                    allowFullScreen
-                  />
-                </div>
-              </section>
-            ) : null}
-
-            {/* ── Festivals / official selections ──
-                Hidden entirely when no festivals have been added. */}
-            {festivals.length > 0 ? (
-              <section className="px-6 md:px-8 py-10">
-                <SidebarLabel>Festivals &amp; Official Selections</SidebarLabel>
-                <ul className="list-none mt-6 flex flex-col">
-                  {festivals.map((festival, i) => {
-                    const laurel = sanityImage(festival.laurel, 200, "");
-                    return (
-                      <li
-                        key={festival._key ?? `${festival.name}-${i}`}
-                        className="flex items-center gap-4 py-3"
-                        style={{ borderBottom: `1px solid ${colors.border}` }}
-                      >
-                        {laurel ? (
-                          // Laurels are shown whole, never cropped — a laurel
-                          // with its edges cut off looks broken. `width`/`height`
-                          // here are an upper bound; the CSS keeps the real
-                          // aspect ratio.
-                          <Image
-                            src={laurel.src}
-                            alt={laurel.alt}
-                            width={120}
-                            height={40}
-                            className="h-10 w-auto flex-shrink-0"
-                            style={{ objectFit: "contain" }}
-                          />
-                        ) : null}
-                        <div className="flex flex-col gap-1">
-                          <span
-                            className="text-[13px]"
-                            style={{ color: colors.text.primary }}
-                          >
-                            {[festival.name, festival.year]
-                              .filter(Boolean)
-                              .join(" — ")}
-                          </span>
-                          <span
-                            className="text-[10px] uppercase"
-                            style={{
-                              color: colors.text.tertiary,
-                              letterSpacing: typography.tracking.widest,
-                            }}
-                          >
-                            {festival.award || "Official Selection"}
-                          </span>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </section>
-            ) : null}
-
-            {/* ── Poster ──
-                Portrait artwork shown whole at its natural aspect ratio:
-                never stretched, never cropped, never used as a hero. */}
-            {hasImageAsset(project.poster) ? (
-              <section className="px-6 md:px-8 py-10">
-                <SidebarLabel>Poster</SidebarLabel>
-                <div className="mt-6">
-                  <SanityPoster
-                    source={project.poster}
-                    sizes="(max-width: 768px) 80vw, 420px"
-                    alt={`${project.title} — poster`}
-                  />
-                </div>
-              </section>
-            ) : null}
+            {/* Trailer */}
+            {/* @ts-ignore */}
+            {project.trailerUrl && (
+              <div
+                className="relative w-full"
+                style={{ aspectRatio: "16/9", backgroundColor: colors.background.alt }}
+              >
+                <iframe
+                  /* @ts-ignore */
+                  src={project.trailerUrl}
+                  className="absolute top-0 left-0 w-full h-full border-0"
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            )}
           </div>
 
           {/* ── Info sidebar ── */}
@@ -442,6 +430,21 @@ export default async function ProjectPage({
                   }}
                 >
                   {project.logline}
+                </p>
+              )}
+
+              {/* Short paragraph */}
+              {/* @ts-ignore */}
+              {project.shortParagraph && (
+                <p
+                  className="font-light text-[14px]"
+                  style={{
+                    color: colors.text.secondary,
+                    lineHeight: typography.leading.loose,
+                  }}
+                >
+                  {/* @ts-ignore */}
+                  {project.shortParagraph}
                 </p>
               )}
 
@@ -476,8 +479,46 @@ export default async function ProjectPage({
               )}
 
 
-              {/* Festival selections are rendered in the main column above,
-                  alongside the stills, trailer and poster. */}
+              {/* Awards */}
+              {/* @ts-ignore */}
+              {Array.isArray(project.awards) && project.awards.length > 0 && (
+                <div>
+                  <SidebarLabel>Awards & Laurels</SidebarLabel>
+                  {/* @ts-ignore */}
+                  {project.awards.map((award: any, i: number) => (
+                    <div
+                      key={i}
+                      className="py-2 text-[11px]"
+                      style={{
+                        color: colors.text.secondary,
+                        borderBottom: `1px solid ${colors.border}`,
+                      }}
+                    >
+                      {award.title}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Press Kit PDF */}
+              {/* @ts-ignore */}
+              {project.pressKitUrl && (
+                <a
+                  /* @ts-ignore */
+                  href={project.pressKitUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block text-[10px] uppercase transition-opacity duration-200 hover:opacity-60 self-start"
+                  style={{
+                    color: colors.text.primary,
+                    letterSpacing: typography.tracking.widest,
+                    borderBottom: `1px solid ${colors.border}`,
+                    paddingBottom: "4px",
+                  }}
+                >
+                  Download Press Kit ↓
+                </a>
+              )}
             </div>
           </div>
         </div>
