@@ -229,17 +229,7 @@ export default async function Home() {
                   lineHeight: typography.leading.loose,
                 }}
               >
-                Gerald Gyimah is a writer and director based in London. His work examines institutional spaces, procedural language, and the quiet pressures through which systems produce outcomes.
-              </p>
-              <p
-                className="font-light"
-                style={{
-                  fontSize: "14px",
-                  color: colors.text.primary,
-                  lineHeight: typography.leading.loose,
-                }}
-              >
-                His films examine how ordinary conversations, administrative processes and institutional spaces quietly determine people’s lives.
+                Gerald Gyimah is a writer and director based in London. His work examines institutional spaces, procedural language and the quiet pressures through which systems shape people’s lives.
               </p>
               <p
                 className="font-light"
