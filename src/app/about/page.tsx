@@ -97,9 +97,9 @@ export default async function AboutPage() {
                   lineHeight: typography.leading.loose,
                 }}
               >
-                Gerald Gyimah is a writer and director working in fiction film
-                and documentary. His work is concerned with stillness,
-                institutional space, and the weight of what remains unspoken.
+                Gerald Gyimah is a writer and director based in London. His
+                work examines institutional spaces, procedural language and the
+                quiet pressures through which systems shape people’s lives.
               </p>
 
               <p
@@ -111,7 +111,7 @@ export default async function AboutPage() {
                 }}
               >
                 He is the founder of Still Room Productions, through which he
-                develops and produces independent work. He is based in London.
+                develops and produces independent work.
               </p>
 
               <p
@@ -210,9 +210,9 @@ export default async function AboutPage() {
                   cropped into a fixed slot. */}
               <SanityImageWhole
                 source={settings?.portrait}
-                sizes="(max-width: 768px) 100vw, 45vw"
+                sizes="(max-width: 768px) 100vw, 420px"
                 alt="Gerald Gyimah — portrait"
-                className="mt-8 md:mt-10"
+                className="mt-8 md:mt-10 md:max-w-[420px]"
                 priority
               />
 
