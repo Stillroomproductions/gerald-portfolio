@@ -1,0 +1,402 @@
+[
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "options": {
+          "source": "title"
+        },
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "name": "year",
+        "type": "number"
+      },
+      {
+        "options": {
+          "list": [
+            "Short Film",
+            "Feature Film",
+            "Documentary",
+            "Series"
+          ]
+        },
+        "name": "format",
+        "type": "string"
+      },
+      {
+        "name": "duration",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            "Complete",
+            "In Development",
+            "Post-Production"
+          ]
+        },
+        "name": "status",
+        "type": "string"
+      },
+      {
+        "rows": 3,
+        "name": "logline",
+        "type": "text"
+      },
+      {
+        "description": "Film stills. The first is used on the homepage grid; all of them appear on the film page. For each one, click the crop icon and drag the circle over the part that must always stay visible — the site keeps that point in frame when the image is cropped to fit different screen sizes.",
+        "of": [
+          {
+            "options": {
+              "hotspot": true
+            },
+            "fields": [
+              {
+                "validation": [
+                  {
+                    "level": "warning",
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "message": "Alt text is recommended for accessibility and SEO."
+                  }
+                ],
+                "description": "Describes the still for screen readers and Google.",
+                "name": "alt",
+                "type": "string",
+                "title": "Image description (for SEO & accessibility)"
+              }
+            ],
+            "type": "image"
+          }
+        ],
+        "name": "stills",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "role",
+                "type": "string",
+                "title": "Character Name"
+              },
+              {
+                "name": "name",
+                "type": "string",
+                "title": "Actor Name"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "cast",
+        "type": "array",
+        "title": "Cast / Starring"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "role",
+                "type": "string"
+              },
+              {
+                "name": "name",
+                "type": "string"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "credits",
+        "type": "array"
+      },
+      {
+        "fields": [
+          {
+            "name": "company",
+            "type": "string"
+          },
+          {
+            "name": "country",
+            "type": "string"
+          },
+          {
+            "name": "language",
+            "type": "string"
+          }
+        ],
+        "name": "production",
+        "type": "object"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              },
+              {
+                "flag": "custom"
+              }
+            ]
+          }
+        ],
+        "description": "Paste the Vimeo or YouTube link for the film. Leave empty and no video section appears on the page. The video never plays on its own — a visitor has to press play.",
+        "name": "trailerUrl",
+        "type": "url",
+        "title": "Trailer / Teaser URL"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Trailer",
+              "value": "Trailer"
+            },
+            {
+              "title": "Teaser",
+              "value": "Teaser"
+            }
+          ],
+          "layout": "radio"
+        },
+        "initialValue": "Trailer",
+        "description": "The wording shown above the video. Defaults to Trailer.",
+        "name": "trailerLabel",
+        "type": "string",
+        "title": "Video heading"
+      },
+      {
+        "description": "Add a row per festival as selections come in. Only the festival name is required. Drag the handles to reorder. Leave this empty and no festivals section appears on the film page.",
+        "of": [
+          {
+            "fields": [
+              {
+                "validation": [
+                  {
+                    "level": "error",
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ]
+                  }
+                ],
+                "name": "name",
+                "type": "string",
+                "title": "Festival name"
+              },
+              {
+                "description": "e.g. 2026. Optional.",
+                "name": "year",
+                "type": "string"
+              },
+              {
+                "description": "Optional, e.g. \"Best Short Film\" or \"Nominated — Best Director\". Leave empty for a plain official selection.",
+                "name": "award",
+                "type": "string",
+                "title": "Award / Nomination"
+              },
+              {
+                "options": {
+                  "hotspot": false
+                },
+                "description": "Optional. The festival laurel, ideally a PNG with a transparent background. Shown small beside the entry; the text is always shown whether or not a laurel is added.",
+                "fields": [
+                  {
+                    "description": "For screen readers. Optional but recommended.",
+                    "name": "alt",
+                    "type": "string",
+                    "title": "Image description"
+                  }
+                ],
+                "name": "laurel",
+                "type": "image",
+                "title": "Laurel image"
+              }
+            ],
+            "type": "object",
+            "name": "festival"
+          }
+        ],
+        "name": "festivalSelections",
+        "type": "array",
+        "title": "Festivals / Official Selections"
+      },
+      {
+        "options": {
+          "hotspot": false
+        },
+        "description": "The vertical marketing poster with the title and credits on it. This is NOT a film still — do not put a landscape image here. It appears on its own below the film information, shown whole at its natural shape. Recommended: portrait, around 2:3 (e.g. 1400 x 2000px).",
+        "fields": [
+          {
+            "description": "Describes the poster for screen readers and Google.",
+            "name": "alt",
+            "type": "string",
+            "title": "Image description"
+          }
+        ],
+        "name": "poster",
+        "type": "image",
+        "title": "Film poster (portrait)"
+      },
+      {
+        "rows": 3,
+        "name": "synopsis",
+        "type": "text",
+        "title": "SEO Synopsis (1–2 sentences, ≤160 chars)"
+      },
+      {
+        "name": "releaseDate",
+        "type": "date"
+      },
+      {
+        "name": "order",
+        "type": "number",
+        "title": "Display Order"
+      }
+    ],
+    "name": "project",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "options": {
+          "hotspot": true
+        },
+        "description": "The main photo of Gerald. Used on the homepage beside the About text and as the portrait on the About page. These two slots are different shapes — a tall column on desktop and a wider crop on mobile — so click the crop icon and drag the circle over his face. That point is kept in frame whatever the shape, so the photo is never cut off at the top.",
+        "fields": [
+          {
+            "description": "Describes the image for screen readers and Google. Recommended on every image.",
+            "name": "alt",
+            "type": "string",
+            "title": "Image description"
+          }
+        ],
+        "name": "portrait",
+        "type": "image",
+        "title": "Portrait of Gerald"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "description": "A working or behind-the-scenes photo, shown below the portrait on the About page. Leave this empty and the slot is hidden completely — no empty box appears on the page.",
+        "fields": [
+          {
+            "description": "Describes the image for screen readers and Google. Recommended on every image.",
+            "name": "alt",
+            "type": "string",
+            "title": "Image description"
+          },
+          {
+            "description": "Small line shown over the bottom-left of the image.",
+            "name": "caption",
+            "type": "string",
+            "title": "Caption (optional)"
+          }
+        ],
+        "name": "onSetImage",
+        "type": "image",
+        "title": "On set / behind the scenes"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "description": "The wide behind-the-scenes band in the Directing section of the homepage. Rendered in black and white. Drag the hotspot onto whatever must stay in frame. Leave empty to hide the whole Directing section.",
+        "fields": [
+          {
+            "description": "Describes the image for screen readers and Google. Recommended on every image.",
+            "name": "alt",
+            "type": "string",
+            "title": "Image description"
+          }
+        ],
+        "name": "directingImage",
+        "type": "image",
+        "title": "Directing image (homepage)"
+      },
+      {
+        "description": "The full-width bands near the bottom of the homepage. These are a very wide, letterbox shape that crops hard, so the hotspot matters most here. Leave empty and no bands appear.",
+        "of": [
+          {
+            "options": {
+              "hotspot": true
+            },
+            "fields": [
+              {
+                "description": "Describes the image for screen readers and Google. Recommended on every image.",
+                "name": "alt",
+                "type": "string",
+                "title": "Image description"
+              },
+              {
+                "name": "caption",
+                "type": "string",
+                "title": "Caption (optional, shown bottom-left)"
+              }
+            ],
+            "type": "image"
+          }
+        ],
+        "name": "atmosphericImages",
+        "type": "array",
+        "title": "Atmospheric bands (homepage)"
+      }
+    ],
+    "name": "siteSettings",
+    "type": "document"
+  }
+]
